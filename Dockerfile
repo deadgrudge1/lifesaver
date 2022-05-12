@@ -10,7 +10,7 @@ RUN apk add -U --no-cache ca-certificates
 
 # APPLICATION USER
 RUN addgroup -g 1001 app
-RUN addUser app -u 1001 -D -G app /home/app
+RUN addser app -u 1001 -D -G app /home/app
 
 
 ####
@@ -20,7 +20,7 @@ WORKDIR /lifesaver
 
 # CERTIFIACTES : COPY FROM STAGE 1
 # To run this container from the GoLang container
-COPY --from=root-certs /etc/ssl/certs/ca.certificates.crt /etc/ssl/certss
+COPY --from=root-certs /etc/ssl/certs/ca.certificates.crt /etc/ssl/certs/
 
 # DEPENDENCIES
 # Copy go mod and sum files (To avoid duplicate requests for dependencies)
@@ -44,7 +44,7 @@ COPY --from=root-certs /etc/passwd /etc/passwd
 COPY --from=root-certs /etc/group /etc/group
 
 # Copy Root Certificates | Set Owner and Group to 1001
-COPY --chown=1001:1001 --from=root-certs /etc/ssl/certs/ca-certs.crt /etc/ssl/certs
+COPY --chown=1001:1001 --from=root-certs /etc/ssl/certs/ca-certs.crt /etc/ssl/certs/
 
 # Copy binary that is built in Stage 2 | Set owner to group and user 1001
 COPY --chown=1001:1001 --from=builder /lifesaver /lifesaver
