@@ -2,18 +2,20 @@ package postgres
 
 import (
 	"log"
+	"os"
 	"database/sql"
 	"fmt"
+	_ "github.com/lib/pq"
 	"github.com/golang-migrate/migrate/v4"
     "github.com/golang-migrate/migrate/v4/database/postgres"
 )
 
-const (
-	host	= "localhost"
-	port	= 5432
-	user	= "app"	
-	pass	= "hello123"
-	schema	= "lifesaver_db"
+var (
+	host	= os.Getenv("POSTGRES_DB_HOST")
+	port	= os.Getenv("POSTGRES_DB_PORT")
+	user	= os.Getenv("POSTGRES_DB_USER")	
+	pass	= os.Getenv("POSTGRES_DB_PASS")
+	schema	= os.Getenv("POSTGRES_DB_NAME")
 )
 
 var (
