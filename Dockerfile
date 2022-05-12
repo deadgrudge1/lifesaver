@@ -10,7 +10,7 @@ RUN apk add -U --no-cache ca-certificates
 
 # APPLICATION USER
 RUN addgroup -g 1001 app
-RUN addser app -u 1001 -D -G app /home/app
+RUN adduser app -u 1001 -D -G app /home/app
 
 
 ####
