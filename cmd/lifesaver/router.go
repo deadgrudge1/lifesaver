@@ -11,6 +11,7 @@ func initRouter() {
 	gin.Logger()
 	router.Use(gin.Logger())
 
+	//User Endpoints
     router.GET("/user/:userId", rest.GetUser)
 	router.POST("/user", rest.SaveUser)
 	router.PUT("/user/:userId", rest.UpdateUser)

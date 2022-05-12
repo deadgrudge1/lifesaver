@@ -15,7 +15,6 @@ func main() {
     log.SetOutput(file)
 
 	fmt.Println("LifeSaver says Hi!")
-	log.Println("Creating log statement.")
 
 	initRouter()
 }
