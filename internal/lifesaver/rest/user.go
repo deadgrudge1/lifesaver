@@ -17,22 +17,21 @@ func GetUser(context *gin.Context) {
 
 	user, err := service.GetUser(userId)
 	if(err != nil) {
-		context.IndentedJSON(http.StatusOK, err)
+		context.IndentedJSON(err.Code, err)
 	} else {
 		context.IndentedJSON(http.StatusOK, user)
 	}
 }
 
 func SaveUser(context *gin.Context) {
-	var user *models.User
+	var user models.User
     if bindError := context.BindJSON(&user); bindError != nil {
         context.Status(http.StatusBadRequest)
     }
-	user.Id = context.Param("userId")
 
 	newUserId, err := service.CreateUser(user)
 	if(err != nil) {
-		context.IndentedJSON(http.StatusOK, err)
+		context.IndentedJSON(err.Code, err)
 	} else {
 		context.JSON(http.StatusOK, gin.H{ "id" : newUserId } )
 	}
@@ -47,7 +46,7 @@ func UpdateUser(context *gin.Context) {
 
 	err := service.UpdateUser(user)
 	if(err != nil) {
-		context.IndentedJSON(http.StatusOK, err)
+		context.IndentedJSON(err.Code, err)
 	} else {
 		context.Status(http.StatusOK)
 	}
@@ -58,7 +57,7 @@ func DeleteUser(context *gin.Context) {
 
 	err := service.RemoveUser(userId)
 	if(err != nil) {
-		context.IndentedJSON(http.StatusOK, err)
+		context.IndentedJSON(err.Code, err)
 	} else {
 		context.Status(http.StatusOK)
 	}

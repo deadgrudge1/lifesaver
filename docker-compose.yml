@@ -6,26 +6,37 @@ services:
       dockerfile: Dockerfile
       context: .
       target: final
+    ports: 
+      - "8081:8081" 
+    depends_on:
+      - postgres-db  
+    links:
+      - postgresdb
     volumes:
-      - app:/lifesaver
+      - app:/lifesaver_app
+    environment:
+      POSTGRES_DB_NAME: ${POSTGRES_DB_NAME} 
+      POSTGRES_DB_HOST: ${POSTGRES_DB_HOST}
+      POSTGRES_DB_PORT: ${POSTGRES_DB_PORT} 
+      POSTGRES_DB_USER: ${POSTGRES_DB_USER} 
+      POSTGRES_DB_PASS: ${POSTGRES_DB_PASS}
+    network_mode: host
   postgresdb:
     image: postgres:latest
     container_name: databasse
+    ports:
+      - "5432:5432"
     volumes:
       - database_postgres:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: ${DB_NAME} 
-      POSTGRES_USER: ${DB_USER} 
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB_NAME} 
+      POSTGRES_USER: ${POSTGRES_DB_USER} 
+      POSTGRES_PASSWORD: ${POSTGRES_DB_PASS}
+    network_mode: host
 
 volumes:
   app:
   database_postgres:
-
-# Networks to be created to facilitate communication between containers
-networks:
-  fullstack:
-    driver: bridge
 
 
 

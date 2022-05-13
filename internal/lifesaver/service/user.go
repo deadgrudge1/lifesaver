@@ -36,30 +36,30 @@ func IsExists(userId string, email string, defaultError string) (bool, error) {
 	return false, nil;
 }
 
-func CreateUser(userToCreate *models.User) (string, *models.ErrorResponse) {
-	log.Println("[UserService][SaveUser] BEGIN")
+func CreateUser(userToCreate models.User) (string, *models.ErrorResponse) {
+	log.Println("[UserService][SaveUser] BEGIN = ", userToCreate.Id)
 
 	//Generate UUID
 	newUserId := uuid.New().String()
-
-	//Check if user already exists with same Id/Email
-	isUserExists, err := IsExists(newUserId, userToCreate.Email, DEFAULT_ERROR_CREATE_USER)
-	if err != nil {
-		return "", getErrorResponse(500, DEFAULT_ERROR_CREATE_USER)
-	}
-	if isUserExists {
-		return "", getErrorResponse(500, "User exists with same ID or Email")
-	}
 
 	//Validate New User before persiting details
 	validationMessage := userToCreate.ValidateInsert()
 	if len(validationMessage) > 1 {
 		return "", getErrorResponse(400, validationMessage)
-	}	
+	}
+
+	//Check if user already exists with same Id/Email
+	// isUserExists, err := IsExists(newUserId, userToCreate.Email, DEFAULT_ERROR_CREATE_USER)
+	// if err != nil {
+	// 	return "", getErrorResponse(500, DEFAULT_ERROR_CREATE_USER)
+	// }
+	// if isUserExists {
+	// 	return "", getErrorResponse(500, "User exists with same ID or Email")
+	// }	
 
 	//Save New User
 	user := database.User{Id: newUserId, Email: userToCreate.Email, Name: userToCreate.Name}
-	newUserId, err = user.Save()
+	newUserId, err := user.Save()
 	if err != nil {
 		return "", getErrorResponse(500, DEFAULT_ERROR_CREATE_USER)
 	}
@@ -82,6 +82,12 @@ func GetUser(userId string) (*models.User, *models.ErrorResponse) {
 }
 
 func UpdateUser(userToUpdate *models.User) *models.ErrorResponse {
+	//Validate User Details
+	validationMessage := userToUpdate.ValidateInsert()
+	if len(validationMessage) > 1 {
+		return getErrorResponse(400, validationMessage)
+	}
+	
 	//Check if user already exists
 	isUserExists, err := IsExists(userToUpdate.Id, "", DEFAULT_ERROR_UPDATE_USER)
 	if err != nil {
@@ -89,12 +95,6 @@ func UpdateUser(userToUpdate *models.User) *models.ErrorResponse {
 	}
 	if !isUserExists {
 		return getErrorResponse(500, "No such user found, unable to update user data.")
-	}
-
-	//Validate User Details
-	validationMessage := userToUpdate.ValidateInsert()
-	if err != nil {
-		return getErrorResponse(400, validationMessage)
 	}
 
 	//Update existing user

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
     "github.com/golang-migrate/migrate/v4/database/postgres"
 )
 
@@ -19,25 +20,30 @@ var (
 )
 
 var (
-	Client sql.DB
+	Client *sql.DB
 )
 
 func flyway() error {
-	connectionString := fmt.Sprintf("postgres://%s:%d/%s?sslmode=enable",
-		host, port, schema, pass, schema)
+	connectionString := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		user, pass, host, port, schema)
 
 	//Initiate Connection
 	db, err := sql.Open("postgres", connectionString)
+	if(err != nil) {
+		log.Println("Failed to open connection : ", err)
+		return err
+	}
+
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if(err != nil) {
-		log.Println("[FLYWAY] Failed to create instance for Postgres Connection")
+		log.Println("[FLYWAY] Failed to create instance for Postgres Connection : ", err)
 		return err
 	}
 
 	//Migrate
-    migration, err := migrate.NewWithDatabaseInstance("file:///db/migrations", "postgres", driver)
+    migration, err := migrate.NewWithDatabaseInstance("file:///db/migration", "postgres", driver)
 	if(err != nil) {
-		log.Println("[FLYWAY] Failed to create Database Instance")
+		log.Println("[FLYWAY] Failed to create Database Instance : ", err)
 		return err;
 	}
 
@@ -50,24 +56,24 @@ func flyway() error {
 }
 	
 
-func init() {
+func Init() {
 	//Create tables from migration
 	flyway()
 
-	connectionString := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s schema=%s sslmode=disable",
-		host, port, user, pass, schema)
+	connectionString := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		user, pass, host, port, schema)
 	
 	//Open Connection
-	Client, err := sql.Open("postgres", connectionString)
+	var err error
+	Client, err = sql.Open("postgres", connectionString)
 	if err != nil {
-		log.Println("[DATA_BASE] Failed to open database connection to Postgres")
+		log.Println("[DATA_BASE] Failed to open database connection to Postgres : ", err)
 	}
 
 	//Ping Database
 	err = Client.Ping()
 	if err != nil {
-		log.Println("[DATA_BASE] Failed to reach database - Postgres")
+		log.Println("[DATA_BASE] Failed to reach database - Postgres : ", err)
 	} else {
 		log.Println("[DATA_BASE] Successfully Connected - Postgres")
 	}
