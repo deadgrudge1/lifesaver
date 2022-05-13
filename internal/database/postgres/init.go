@@ -23,18 +23,16 @@ var (
 var (
 	Client *sql.DB
 	
-	// go:embed lifesaver/db/migration/*.sql
+	// go:embed db/migration/*.sql
 	fs embed.FS
 )
-
-
 
 func flyway() error {
 	connectionString := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		user, pass, host, port, schema)
 
 	// Get migrations from sql folder
-	d, err := iofs.New(fs, "lifesaver/db/migration") 
+	d, err := iofs.New(fs, "db/migration") 
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,13 +50,14 @@ func flyway() error {
 		log.Println("[FLYWAY] UP - FAILED : ", err)
 	}
 
+	log.Println("[FLYWAY] UP - SUCCESS : ", err)
 	return nil
 }
 	
 
 func init() {
 	//Create tables from migration
-	// flyway()
+	// flyway()		ATTEMPT: failed to init driver with path db/migration: open db/migration: file does not exist
 
 	connectionString := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		user, pass, host, port, schema)

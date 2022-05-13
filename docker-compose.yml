@@ -35,6 +35,7 @@ services:
     network_mode: host
   flyway:
     image: flyway/flyway:latest
+    container_name: flyway 
     environment:
          - FLYWAY_USER=${POSTGRES_DB_USER}
          - FLYWAY_PASSWORD=${POSTGRES_DB_PASS}
