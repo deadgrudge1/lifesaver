@@ -1,7 +1,6 @@
 package service
 
 import (
-	"log"
 	database "lifesaver/internal/lifesaver/repo/postgres"
 	"lifesaver/pkg/models"
 	"github.com/google/uuid"
@@ -18,15 +17,13 @@ const (
 	DEFAULT_ERROR_REMOVE_USER	= "Unable to delete existing user."
 )
 
-func IsExists(userId string, email string, defaultError string) (bool, error) {
+func IsExists(userId string) (bool, error) {
 	userRepository = &user
 
 	//Check for existing user
-	isUserExists, err := userRepository.IsExists(userId, email)
+	isUserExists, err := userRepository.IsExists(userId)
 
 	if err != nil {
-		//LOG
-		// return false, fmt.Errorf(DEFAULT_ERROR_IS_EXISTS)
 		return false, err
 	}
 	if isUserExists {
@@ -37,8 +34,6 @@ func IsExists(userId string, email string, defaultError string) (bool, error) {
 }
 
 func CreateUser(userToCreate *models.User) (string, *models.ErrorResponse) {
-	log.Println("[UserService][SaveUser] BEGIN = ", userToCreate.Id)
-
 	//Generate UUID
 	newUserId := uuid.New().String()
 
@@ -48,21 +43,12 @@ func CreateUser(userToCreate *models.User) (string, *models.ErrorResponse) {
 		return "", getErrorResponse(400, validationMessage)
 	}
 
-	var err error
-	// var isUserExists bool
-
-	// Check if user already exists with same Id/Email
-	// isUserExists, err = IsExists(newUserId, userToCreate.Email, DEFAULT_ERROR_CREATE_USER)
-	// if err != nil {
-	// 	return "", getErrorResponse(500, DEFAULT_ERROR_CREATE_USER)
-	// }
-	// if isUserExists {
-	// 	return "", getErrorResponse(500, "User exists with same ID or Email")
-	// }	
+	//If there are pk constraints on columns, we should check if any records exist with same value
+	//Throw apt error if such a record is found
 
 	//Save New User
 	user := database.User{Id: newUserId, Email: userToCreate.Email, Name: userToCreate.Name}
-	newUserId, err = user.Save()
+	newUserId, err := user.Save()
 	if err != nil {
 		return "", getErrorResponse(500, DEFAULT_ERROR_CREATE_USER)
 	}
@@ -73,19 +59,13 @@ func CreateUser(userToCreate *models.User) (string, *models.ErrorResponse) {
 func GetUser(userId string) (*models.User, *models.ErrorResponse) {
 	userRepository = &user
 
-	//Check if user already exists
-	isUserExists, err := IsExists(userId, "", DEFAULT_ERROR_UPDATE_USER)
-	if err != nil {
-		return nil, getErrorResponse(500, "Failed to get user datils.")
-	}
-	if !isUserExists {
-		return nil, getErrorResponse(500, "No such user found.")
-	}
-
 	//Get Existing User
 	user, err := userRepository.GetById(userId)
 	if err != nil {
 		return nil, getErrorResponse(500, DEFAULT_ERROR_GET_USER)
+	}
+	if user == nil {
+		return nil, getErrorResponse(500, "No such user found.")
 	}
 
 	return user, nil
@@ -97,11 +77,9 @@ func UpdateUser(userToUpdate *models.User) *models.ErrorResponse {
 	if len(validationMessage) > 1 {
 		return getErrorResponse(400, validationMessage)
 	}
-
-	log.Println("Id : ", userToUpdate.Id)
 	
 	//Check if user already exists
-	isUserExists, err := IsExists(userToUpdate.Id, "", DEFAULT_ERROR_UPDATE_USER)
+	isUserExists, err := IsExists(userToUpdate.Id)
 	if err != nil {
 		return getErrorResponse(500, "Failed to get user datils. Unable to update user.")
 	}
@@ -123,7 +101,7 @@ func RemoveUser(userId string) *models.ErrorResponse {
 	userRepository = &user
 
 	//Check if user already exists
-	isUserExists, err := IsExists(userId, "", DEFAULT_ERROR_REMOVE_USER)
+	isUserExists, err := IsExists(userId)
 	if err != nil {
 		return getErrorResponse(500, "Failed to get user information. Unable to delte user.")
 	}

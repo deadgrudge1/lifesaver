@@ -11,7 +11,7 @@ type User struct {
 type UserRepository interface {
 
 	//Get existing user details
-	IsExists(userId string, email string) (bool, error)
+	IsExists(userId string) (bool, error)
 
 	//Create a new user
 	Save() (string, error)

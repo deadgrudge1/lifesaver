@@ -3,13 +3,11 @@ package rest
 import (
 	"net/http"
 	"github.com/gin-gonic/gin"
+	
 	"lifesaver/internal/lifesaver/service"
 	"lifesaver/pkg/models"
 )
 
-// var userService service.userService
-
-// func GetUser(rw http.ResponseWriter, req *http.Request) {
 func GetUser(context *gin.Context) {
 	userId := context.Param("userId")
 
