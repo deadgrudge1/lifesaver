@@ -9,7 +9,6 @@ import (
 	"embed"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-    // "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 )
 
@@ -34,36 +33,24 @@ func flyway() error {
 	connectionString := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		user, pass, host, port, schema)
 
-	// //Initiate Connection
-	// db, err := sql.Open("postgres", connectionString)
-	// if(err != nil) {
-	// 	log.Println("Failed to open connection : ", err)
-	// 	return err
-	// }
-
-	// driver, err := postgres.WithInstance(db, &postgres.Config{})
-	// if(err != nil) {
-	// 	log.Println("[FLYWAY] Failed to create instance for Postgres Connection : ", err)
-	// 	return err
-	// }
-
-	d, err := iofs.New(fs, "lifesaver/db/migration") // Get migrations from sql folder
+	// Get migrations from sql folder
+	d, err := iofs.New(fs, "lifesaver/db/migration") 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	//Migrate
-    // migration, err := migrate.NewWithDatabaseInstance(fmt.Sprintf("file://lifesaver/db/migarion"), "postgres", driver)
+	//Instantiate Migration
 	migration, err := migrate.NewWithSourceInstance("iofs", d, connectionString)
 	if(err != nil) {
 		log.Println("[FLYWAY] Failed to create Database Instance : ", err)
 		return err;
 	}
 
-    migration.Up()
-
-	//Close flyway connection
-	// db.Close()
+	//Migrate
+    err = migration.Up()
+	if(err != nil) {
+		log.Println("[FLYWAY] UP - FAILED : ", err)
+	}
 
 	return nil
 }

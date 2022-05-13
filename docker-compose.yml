@@ -33,18 +33,18 @@ services:
       POSTGRES_USER: ${POSTGRES_DB_USER} 
       POSTGRES_PASSWORD: ${POSTGRES_DB_PASS}
     network_mode: host
-  # flyway:
-  #   image: flyway/flyway:latest
-  #   environment:
-  #        - FLYWAY_USER=${POSTGRES_DB_USER}
-  #        - FLYWAY_PASSWORD=${POSTGRES_DB_PASS}
-  #        - FLYWAY_URL=jdbc:postgresql://postgres:${POSTGRES_DB_PORT}/${POSTGRES_DB_NAME}
-  #   command: -locations=filesystem:/sql/flyway -connectRetries=60 migrate
-  #   volumes:
-  #     - ${PWD}/sql_versions:/flyway/sql
-  #     - ${PWD}/docker-flyway.config:/flyway/conf/flyway.config
-  #   depends_on:
-  #     - postgresdb
+  flyway:
+    image: flyway/flyway:latest
+    environment:
+         - FLYWAY_USER=${POSTGRES_DB_USER}
+         - FLYWAY_PASSWORD=${POSTGRES_DB_PASS}
+         - FLYWAY_URL=jdbc:postgresql://postgres:${POSTGRES_DB_PORT}/${POSTGRES_DB_NAME}
+    command: -locations=filesystem:/sql/flyway -connectRetries=60 migrate
+    volumes:
+      - ${PWD}/sql_versions:/flyway/sql
+      - ${PWD}/docker-flyway.config:/flyway/conf/flyway.config
+    depends_on:
+      - postgresdb
 
 volumes:
   app:

@@ -12,5 +12,4 @@ func main() {
 	fmt.Println("LifeSaver says Hi!")
 
 	initRouter()
-
 }
