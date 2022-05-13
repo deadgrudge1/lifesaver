@@ -1,0 +1,37 @@
+Docker Compose (Multiple Containers) :
+
+Docker Login
+sudo docker Login
+
+Docker Compose
+sudo docker compose up -d --build
+./run_tests
+docker-compose down
+
+Docker Container :
+
+Build Container
+sudo docker build -t testing .
+
+Run Container
+sudo docker run testing
+
+Run Container in Background
+sudo docker run -d testing
+
+List Running Containers
+sudo docker ps
+
+Docker Container Logs
+sudo docker logs 61d3ef0462e6
+
+Stop Docker Container
+sudo docker stop 61d3ef0462e6
+
+
+
+
+An easy check is to start your container as follows:
+
+docker run --network host -d yourimagename
+curl localhost:10009
