@@ -3,31 +3,45 @@ package postgres
 import (
 	database "lifesaver/internal/database/postgres"
 	"lifesaver/pkg/models"
+	// "log"
 )
 
 type User models.User
 type UserRepository models.UserRepository
 
 const (
-	IS_EXISTS		= "SELECT id FROM lifesaver.user WHERE id = $1 or email = $2 LIMIT 1"
-	CREATE_USER		= "INSERT INTO lifesaver.user(id, emal, name) VALUES ($1, $2, $3) RETURNING id"
-	GET_USER		= "SELECT id, email, name FROM lifesaver.user WHERE id = $1 LIMIT 1"
-	UPDATE_USER 	= "UPDATE lifesaver.user SET email = $1, name = $2 WHERE id = $3"
-	DELETE_USER		= "DELTE FROM lifesaver.user WHERE id = $1"
+	IS_EXISTS		= "SELECT id FROM users WHERE id = $1 or email = $2 LIMIT 1"
+	CREATE_USER		= "INSERT INTO users(id, email, name) VALUES ($1, $2, $3) RETURNING id"
+	GET_USER		= "SELECT id, email, name FROM users WHERE id = $1 LIMIT 1"
+	UPDATE_USER 	= "UPDATE users SET email = $1, name = $2 WHERE id = $3"
+	DELETE_USER		= "DELETE FROM users WHERE id = $1"
 )
 
+//b57d9b6d-f3a2-4914-b5e5-ca2e6cce12b0
+
+// func init() {
+// 	_, err := database.Client.Exec("CREATE TABLE users( id varchar(64) primary key, email varchar(64), name varchar(64) )") 
+
+// 	if err != nil {
+// 		log.Println("Failed to create users table")
+// 	} else {
+// 		log.Println("Created users table")
+// 	}
+// }
+
 func(user User) IsExists(userId string, emailId string) (bool, error) {
-	err := database.Client.QueryRow(IS_EXISTS, userId, emailId).Scan(&userId)
+	var err error
+	err = database.Client.QueryRow(IS_EXISTS, userId, emailId).Scan(&userId)
 	
 	if err != nil {
 		return false, err
 	}
 
 	if len(userId) > 0 {
-		return false, nil
+		return true, nil
 	}
 
-	return true, nil
+	return false, nil
 }
 
 func (user *User) Save() (string, error) {

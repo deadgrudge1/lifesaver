@@ -1,7 +1,6 @@
 package rest
 
-import ( 
-	"log"
+import (
 	"net/http"
 	"github.com/gin-gonic/gin"
 	"lifesaver/internal/lifesaver/service"
@@ -10,9 +9,8 @@ import (
 
 // var userService service.userService
 
+// func GetUser(rw http.ResponseWriter, req *http.Request) {
 func GetUser(context *gin.Context) {
-	log.Println("[UserController] BEGIN")
-
 	userId := context.Param("userId")
 
 	user, err := service.GetUser(userId)
@@ -24,8 +22,8 @@ func GetUser(context *gin.Context) {
 }
 
 func SaveUser(context *gin.Context) {
-	var user models.User
-    if bindError := context.BindJSON(&user); bindError != nil {
+	user := new(models.User)
+    if bindError := context.Bind(&user); bindError != nil {
         context.Status(http.StatusBadRequest)
     }
 

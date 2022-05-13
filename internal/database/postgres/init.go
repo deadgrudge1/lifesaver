@@ -6,9 +6,11 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
+	"embed"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-    "github.com/golang-migrate/migrate/v4/database/postgres"
+    // "github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 )
 
 var (
@@ -21,27 +23,38 @@ var (
 
 var (
 	Client *sql.DB
+	
+	// go:embed lifesaver/db/migration/*.sql
+	fs embed.FS
 )
+
+
 
 func flyway() error {
 	connectionString := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		user, pass, host, port, schema)
 
-	//Initiate Connection
-	db, err := sql.Open("postgres", connectionString)
-	if(err != nil) {
-		log.Println("Failed to open connection : ", err)
-		return err
-	}
+	// //Initiate Connection
+	// db, err := sql.Open("postgres", connectionString)
+	// if(err != nil) {
+	// 	log.Println("Failed to open connection : ", err)
+	// 	return err
+	// }
 
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
-	if(err != nil) {
-		log.Println("[FLYWAY] Failed to create instance for Postgres Connection : ", err)
-		return err
+	// driver, err := postgres.WithInstance(db, &postgres.Config{})
+	// if(err != nil) {
+	// 	log.Println("[FLYWAY] Failed to create instance for Postgres Connection : ", err)
+	// 	return err
+	// }
+
+	d, err := iofs.New(fs, "lifesaver/db/migration") // Get migrations from sql folder
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	//Migrate
-    migration, err := migrate.NewWithDatabaseInstance("file:///db/migration", "postgres", driver)
+    // migration, err := migrate.NewWithDatabaseInstance(fmt.Sprintf("file://lifesaver/db/migarion"), "postgres", driver)
+	migration, err := migrate.NewWithSourceInstance("iofs", d, connectionString)
 	if(err != nil) {
 		log.Println("[FLYWAY] Failed to create Database Instance : ", err)
 		return err;
@@ -50,15 +63,15 @@ func flyway() error {
     migration.Up()
 
 	//Close flyway connection
-	db.Close()
+	// db.Close()
 
 	return nil
 }
 	
 
-func Init() {
+func init() {
 	//Create tables from migration
-	flyway()
+	// flyway()
 
 	connectionString := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		user, pass, host, port, schema)
@@ -67,14 +80,14 @@ func Init() {
 	var err error
 	Client, err = sql.Open("postgres", connectionString)
 	if err != nil {
-		log.Println("[DATA_BASE] Failed to open database connection to Postgres : ", err)
+		log.Println("[DATABASE] Failed to open database connection to Postgres : ", err)
 	}
 
 	//Ping Database
 	err = Client.Ping()
 	if err != nil {
-		log.Println("[DATA_BASE] Failed to reach database - Postgres : ", err)
+		log.Println("[DATABASE] Failed to reach database - Postgres : ", err)
 	} else {
-		log.Println("[DATA_BASE] Successfully Connected - Postgres")
+		log.Println("[DATABASE] Successfully Connected - Postgres")
 	}
 }

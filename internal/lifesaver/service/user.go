@@ -36,20 +36,23 @@ func IsExists(userId string, email string, defaultError string) (bool, error) {
 	return false, nil;
 }
 
-func CreateUser(userToCreate models.User) (string, *models.ErrorResponse) {
+func CreateUser(userToCreate *models.User) (string, *models.ErrorResponse) {
 	log.Println("[UserService][SaveUser] BEGIN = ", userToCreate.Id)
 
 	//Generate UUID
 	newUserId := uuid.New().String()
 
-	//Validate New User before persiting details
+	//Validate New User Details before persiting
 	validationMessage := userToCreate.ValidateInsert()
 	if len(validationMessage) > 1 {
 		return "", getErrorResponse(400, validationMessage)
 	}
 
-	//Check if user already exists with same Id/Email
-	// isUserExists, err := IsExists(newUserId, userToCreate.Email, DEFAULT_ERROR_CREATE_USER)
+	var err error
+	// var isUserExists bool
+
+	// Check if user already exists with same Id/Email
+	// isUserExists, err = IsExists(newUserId, userToCreate.Email, DEFAULT_ERROR_CREATE_USER)
 	// if err != nil {
 	// 	return "", getErrorResponse(500, DEFAULT_ERROR_CREATE_USER)
 	// }
@@ -59,7 +62,7 @@ func CreateUser(userToCreate models.User) (string, *models.ErrorResponse) {
 
 	//Save New User
 	user := database.User{Id: newUserId, Email: userToCreate.Email, Name: userToCreate.Name}
-	newUserId, err := user.Save()
+	newUserId, err = user.Save()
 	if err != nil {
 		return "", getErrorResponse(500, DEFAULT_ERROR_CREATE_USER)
 	}
@@ -70,7 +73,14 @@ func CreateUser(userToCreate models.User) (string, *models.ErrorResponse) {
 func GetUser(userId string) (*models.User, *models.ErrorResponse) {
 	userRepository = &user
 
-	log.Println("[UserService][GetUser] BEGIN")
+	//Check if user already exists
+	isUserExists, err := IsExists(userId, "", DEFAULT_ERROR_UPDATE_USER)
+	if err != nil {
+		return nil, getErrorResponse(500, "Failed to get user datils.")
+	}
+	if !isUserExists {
+		return nil, getErrorResponse(500, "No such user found.")
+	}
 
 	//Get Existing User
 	user, err := userRepository.GetById(userId)
@@ -87,6 +97,8 @@ func UpdateUser(userToUpdate *models.User) *models.ErrorResponse {
 	if len(validationMessage) > 1 {
 		return getErrorResponse(400, validationMessage)
 	}
+
+	log.Println("Id : ", userToUpdate.Id)
 	
 	//Check if user already exists
 	isUserExists, err := IsExists(userToUpdate.Id, "", DEFAULT_ERROR_UPDATE_USER)

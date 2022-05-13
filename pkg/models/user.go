@@ -1,10 +1,11 @@
 package models
 
+import "strings"
 
 type User struct {
-	Id 		string		`json:"userId"`
-	Email 	string		`json:"emailId"`
-	Name 	string		`json:"userName"`
+	Id 		string		`json:"id"`
+	Email 	string		`json:"email"`
+	Name 	string		`json:"name"`
 }
 
 type UserRepository interface {
@@ -29,15 +30,11 @@ type UserRepository interface {
 func (user *User) ValidateInsert() string {
 	var errorMessage string
 
-	if len(user.Id) < 1 {
-		appendToError(&errorMessage, "User ID is required.")
-	}
-
-	if len(user.Email) < 1 {
+	if len(strings.TrimSpace(user.Email)) < 1 {
 		appendToError(&errorMessage, "User Email is required.")
 	}
 
-	if len(user.Name) < 1 {
+	if len(strings.TrimSpace(user.Name)) < 1 {
 		appendToError(&errorMessage, "User Name is required.")
 	}
 	
@@ -46,7 +43,7 @@ func (user *User) ValidateInsert() string {
 
 //TODO: Can be moved to Util
 func appendToError(errorMessage *string, messageToAppend string) {
-	if len(*errorMessage) < 1 {
+	if len(*errorMessage) > 1 {
 		*errorMessage += " "
 	}
 
